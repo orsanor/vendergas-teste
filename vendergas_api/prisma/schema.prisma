@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String    @unique
+  password String
+  company  Company[]
+}
+
+model Company {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  nomeFantasia String
+  razaoSocial  String
+  cnpj         String @unique
+
+  userID  String @db.ObjectId
+  usuario Users  @relation(fields: [userID], references: [id])
+
+  client   Client[]
+  produtos Produto[]
+  pedidos  Pedido[]
+}
+
+model Client {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  nome     String
+  email    String
+  telefone String
+
+  companyId String  @db.ObjectId
+  company   Company @relation(fields: [companyId], references: [id])
+
+  pedidos Pedido[]
+}
+
+model Produto {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  nome      String
+  valor     Float
+  descricao String
+
+  companyId String  @db.ObjectId
+  empresa   Company @relation(fields: [companyId], references: [id])
+
+  pedidoProdutos PedidoProduto[]
+}
+
+model Pedido {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  numero     String   @unique
+  observacao String?
+  data       DateTime @default(now())
+
+  clientId String @db.ObjectId
+  client   Client @relation(fields: [clientId], references: [id])
+
+  companyId String  @db.ObjectId
+  empresa   Company @relation(fields: [companyId], references: [id])
+
+  pedidoProdutos PedidoProduto[]
+}
+
+model PedidoProduto {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId // MongoDB-compatible single id
+  pedidoId   String @db.ObjectId
+  produtoId  String @db.ObjectId
+  quantidade Int
+
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id])
+  produto Produto @relation(fields: [produtoId], references: [id])
+}
