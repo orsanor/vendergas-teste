@@ -5,10 +5,18 @@ import clientRoutes from "./routes/clientRoutes";
 import productRoutes from "./routes/productRoutes";
 import orderRoutes from "./routes/orderRoutes";
 import orderProductRoutes from "./routes/orderProductRoutes";
+import cors from "cors";
 
 const app = express();
-app.use(express.json());
 
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+
+app.use(express.json());
 
 app.use("/api/users", userRoutes);
 app.use("/api/companies", companyRoutes);

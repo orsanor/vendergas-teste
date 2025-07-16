@@ -7,7 +7,6 @@ services:
       - "3000:3000"
     volumes:
       - ./vendergas_api:/app
-      - /app/node_modules
     working_dir: /app
     env_file:
       - ./vendergas_api/.env
