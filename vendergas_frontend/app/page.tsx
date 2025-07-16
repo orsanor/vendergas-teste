@@ -8,6 +8,7 @@ export default function UsersPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log("Fetching users...");
     fetchUsers()
       .then(setUsers)
       .catch((err) => setError(err.message));
@@ -17,6 +18,8 @@ export default function UsersPage() {
   if (!users.length) return <p>Carregando...</p>;
 
   return (
+    <div>
+      <h1>Lista de Usuários</h1>
     <ul>
       {users.map((user) => (
         <li key={user.id}>
@@ -24,5 +27,6 @@ export default function UsersPage() {
         </li>
       ))}
     </ul>
+      </div>
   );
 }
