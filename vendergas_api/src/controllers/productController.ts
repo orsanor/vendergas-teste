@@ -44,12 +44,8 @@ export const getProductById = async (req, res) => {
 export const getProductsByCompany = async (req, res) => {
   const { companyId } = req.params;
   const products = await prisma.product.findMany({
-    where: { companyId: Number(companyId) },
+    where: { companyId: String(companyId) }
   });
-  if (products.length === 0) {
-    return res
-      .status(404)
-      .json({ error: "No products found for this company" });
-  }
   res.json(products);
 };
+

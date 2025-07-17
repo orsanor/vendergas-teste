@@ -32,6 +32,7 @@ export default function ClientsPage() {
     const id = localStorage.getItem("activeCompanyId");
     setCompanyId(id);
   }, []);
+
   useEffect(() => {
     const updateCompany = () => {
       const id = localStorage.getItem("activeCompanyId");
