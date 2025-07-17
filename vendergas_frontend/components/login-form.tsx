@@ -1,83 +1,124 @@
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { useSession } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
+import { z } from "zod";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+const loginSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
+export function LoginForm() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
+  const { data: session } = useSession();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  if (session) {
+    router.push("/dashboard");
+  }
 
-    const mockUser = {
-      email: "admin@gdi.com",
-      password: "123",
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setErrorMessage(null);
+    setIsLoading(true);
+
+    const form = event.currentTarget;
+    const formData = {
+      email: form.email.value,
+      password: form.password.value,
     };
 
-    if (email === mockUser.email && password === mockUser.password) {
-      toast.success("Login realizado com sucesso!");
-      setError("");
-      router.push("/dashboard");
-    } else {
-      console.log("Login failed");
-      toast.error("Email ou senha inválidos");
+    console.log("Form Data:", formData);
+    console.log("Form:", form);
+
+    const validation = loginSchema.safeParse(formData);
+    if (!validation.success) {
+      setErrorMessage(validation.error.errors[0].message);
+      setIsLoading(false);
+      return;
     }
+
+    const { error } = await authClient.signIn.email({
+      email: formData.email,
+      password: formData.password,
+    });
+
+    if (error) {
+      setErrorMessage(error.message || "Falha no login");
+    } else {
+      router.push("/dashboard");
+    }
+
+    setIsLoading(false);
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0 md:p-6">
-        <CardContent className="flex flex-col items-center gap-6">
-          <form className="p-6" onSubmit={handleSubmit}>
+    <div className={cn("flex flex-col gap-6")}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Entre com sua conta</CardTitle>
+          <CardDescription>
+            Insira seu email e senha para acessar sua conta.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Vendergas</h1>
-                <p className="text-muted-foreground text-balance">
-                  Sistema de Gerenciamento de Inventário
-                </p>
-              </div>
-
-              {error && (
-                <p className="text-sm text-red-500 text-center">{error}</p>
-              )}
-
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
-                  placeholder="Digite seu email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="m@example.com"
                   required
                 />
               </div>
-
               <div className="grid gap-3">
-                <Label htmlFor="password">Senha</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Senha</Label>
+                </div>
                 <Input
                   id="password"
-                  type="password"
-                  placeholder="Digite sua senha"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  name="password"
+                  type={showPassword ? "text" : "password"}
                   required
                 />
               </div>
 
-              <Button type="submit" className="w-full">
-                Login
-              </Button>
+              {errorMessage && (
+                <p className="text-red-500 text-sm">{errorMessage}</p>
+              )}
+
+              <div className="flex flex-col gap-3">
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Entrando..." : "Login"}
+                </Button>
+              </div>
+            </div>
+            <div className="mt-4 text-center text-sm">
+              Não tem conta?{" "}
+              <a href="/register" className="underline underline-offset-4">
+                Registre-se
+              </a>
             </div>
           </form>
         </CardContent>

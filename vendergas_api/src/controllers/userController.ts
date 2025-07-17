@@ -10,16 +10,16 @@ export const fetchUsers = async (req, res) => {
   }
 };
 
-export const createUser = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-    await userModel.createUser({ name, email, password });
-    res.send("Usuário criado com sucesso");
-  } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).send("Error creating user");
-  }
-};
+// export const createUser = async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
+//     await userModel.createUser({ name, email, password });
+//     res.send("Usuário criado com sucesso");
+//   } catch (error) {
+//     console.error("Error creating user:", error);
+//     res.status(500).send("Error creating user");
+//   }
+// };
 
 export const updateUser = async (req, res) => {
   try {

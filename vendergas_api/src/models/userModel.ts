@@ -4,8 +4,8 @@ const prisma = new PrismaClient();
 
 export const getAllUsers = async () => prisma.user.findMany();
 
-export const createUser = async (userData: any) =>
-  prisma.user.create({ data: userData });
+// export const createUser = async (userData: any) =>
+//   prisma.user.create({ data: userData });
 
 export const getUserById = async (id: string) =>
   prisma.user.findUnique({ where: { id } });

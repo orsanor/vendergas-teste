@@ -9,30 +9,28 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  email     String    @unique
-  password  String
-  companies Company[]
-
+  id            String    @id @map("_id")
+  name          String
+  email         String    @unique
   emailVerified Boolean?
   image         String?
   createdAt     DateTime? @default(now())
   updatedAt     DateTime? @updatedAt
 
-  sessions Session[]
-  accounts Account[]
+  companies Company[]
+  sessions  Session[]
+  accounts  Account[]
 
   @@map("user")
 }
 
 model Company {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  id        String @id @map("_id")
   tradeName String
   legalName String
   cnpj      String @unique
 
-  userId String @db.ObjectId
+  userId String
   user   User   @relation(fields: [userId], references: [id])
 
   clients  Client[]
@@ -41,48 +39,48 @@ model Company {
 }
 
 model Client {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  id    String @id @map("_id")
   name  String
   email String
   phone String
 
-  companyId String  @db.ObjectId
+  companyId String
   company   Company @relation(fields: [companyId], references: [id])
 
   orders Order[]
 }
 
 model Product {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  id          String @id @map("_id")
   name        String
   price       Float
   description String
 
-  companyId String  @db.ObjectId
+  companyId String
   company   Company @relation(fields: [companyId], references: [id])
 
   orderProducts OrderProduct[]
 }
 
 model Order {
-  id     String   @id @default(auto()) @map("_id") @db.ObjectId
+  id     String   @id @map("_id")
   number String   @unique
   notes  String?
   date   DateTime @default(now())
 
-  clientId String @db.ObjectId
+  clientId String
   client   Client @relation(fields: [clientId], references: [id])
 
-  companyId String  @db.ObjectId
+  companyId String
   company   Company @relation(fields: [companyId], references: [id])
 
   orderProducts OrderProduct[]
 }
 
 model OrderProduct {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  orderId   String @db.ObjectId
-  productId String @db.ObjectId
+  id        String @id @map("_id")
+  orderId   String
+  productId String
   quantity  Int
 
   order   Order   @relation(fields: [orderId], references: [id])
@@ -90,7 +88,7 @@ model OrderProduct {
 }
 
 model Session {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @map("_id")
   expiresAt DateTime
   token     String   @unique
   createdAt DateTime @default(now())
@@ -98,17 +96,17 @@ model Session {
   ipAddress String?
   userAgent String?
 
-  userId String @db.ObjectId
+  userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("session")
 }
 
 model Account {
-  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  id                    String    @id @map("_id")
   accountId             String
   providerId            String
-  userId                String    @db.ObjectId
+  userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
@@ -124,7 +122,7 @@ model Account {
 }
 
 model Verification {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  id         String    @id @map("_id")
   identifier String
   value      String
   expiresAt  DateTime
@@ -132,13 +130,4 @@ model Verification {
   updatedAt  DateTime? @updatedAt
 
   @@map("verification")
-}
-
-model Jwks {
-  id         String   @id @map("_id")
-  publicKey  String
-  privateKey String
-  createdAt  DateTime
-
-  @@map("jwks")
 }
