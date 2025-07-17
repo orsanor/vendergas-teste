@@ -1,12 +1,15 @@
-import { Router } from "express";
+import express from "express";
 import * as clientController from "../../../controllers/clientController.js";
+import { requireAuth } from "../../../middlewares/requireAuth.js";
 
-const router = Router();
+const clientRouter = express.Router();
 
-router.get("/", clientController.getClients);
-router.post("/", clientController.createClient);
-router.put("/:id", clientController.updateClient);
-router.delete("/:id", clientController.deleteClient);
-router.get("/:id", clientController.getClientById);
+clientRouter.use(requireAuth);
 
-export default router;
+clientRouter.get("/", clientController.getClients);
+clientRouter.post("/", clientController.createClient);
+clientRouter.put("/:id", clientController.updateClient);
+clientRouter.delete("/:id", clientController.deleteClient);
+clientRouter.get("/:id", clientController.getClientById);
+
+export default clientRouter;

@@ -1,12 +1,15 @@
-import { Router } from "express";
+import express from "express";
 import * as companyController from "../../../controllers/companyController.js";
+import { requireAuth } from "../../../middlewares/requireAuth.js";
 
-const router = Router();
+const companyRouter = express.Router();
 
-router.get("/", companyController.getCompanies);
-router.post("/", companyController.createCompany);
-router.put("/:id", companyController.updateCompany);
-router.delete("/:id", companyController.deleteCompany);
-router.get("/:id", companyController.getCompanyById);
+companyRouter.use(requireAuth);
 
-export default router;
+companyRouter.get("/", companyController.getCompanies);
+companyRouter.post("/", companyController.createCompany);
+companyRouter.put("/:id", companyController.updateCompany);
+companyRouter.delete("/:id", companyController.deleteCompany);
+companyRouter.get("/:id", companyController.getCompanyById);
+
+export default companyRouter;

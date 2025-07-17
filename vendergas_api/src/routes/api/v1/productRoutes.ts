@@ -1,12 +1,15 @@
-import { Router } from "express";
+import express from "express";
+import { requireAuth } from "../../../middlewares/requireAuth.js";
 import * as productController from "../../../controllers/productController.js";
 
-const router = Router();
+const productRouter = express.Router();
 
-router.get("/", productController.getProducts);
-router.post("/", productController.createProduct);
-router.put("/:id", productController.updateProduct);
-router.delete("/:id", productController.deleteProduct);
-router.get("/:id", productController.getProductById);
+productRouter.use(requireAuth);
 
-export default router;
+productRouter.get("/", productController.getProducts);
+productRouter.post("/", productController.createProduct);
+productRouter.put("/:id", productController.updateProduct);
+productRouter.delete("/:id", productController.deleteProduct);
+productRouter.get("/:id", productController.getProductById);
+
+export default productRouter;
