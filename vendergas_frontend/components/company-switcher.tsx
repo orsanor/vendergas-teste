@@ -46,6 +46,12 @@ export function CompanySwitcher({ company }: { company: Company[] }) {
     router.push("/companies");
   };
 
+  const handleSelectCompany = (company) => {
+    setActiveCompany(company);
+    localStorage.setItem("activeCompanyId", company.id);
+    window.dispatchEvent(new Event("companyChanged"));
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -78,7 +84,7 @@ export function CompanySwitcher({ company }: { company: Company[] }) {
             {company.map((company, index) => (
               <DropdownMenuItem
                 key={company.id}
-                onClick={() => setActiveCompany(company)}
+                onClick={() => handleSelectCompany(company)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
