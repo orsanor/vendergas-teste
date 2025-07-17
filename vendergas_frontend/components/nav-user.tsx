@@ -19,10 +19,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { data: session } = useSession();
+  const router = useRouter();
 
   if (!session?.user) return null;
 
@@ -31,6 +33,10 @@ export function NavUser() {
   const handleLogout = async () => {
     await authClient.signOut();
     window.location.href = "/";
+  };
+
+  const handleAccount = () => {
+    router.push("/user");
   };
 
   return (
@@ -71,15 +77,15 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleAccount}>
                 <BadgeCheck />
-                Account
+                Minha conta
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
-              Log out
+              Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

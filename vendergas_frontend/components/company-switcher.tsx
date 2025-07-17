@@ -1,9 +1,7 @@
-
 "use client";
 
 import * as React from "react";
 import { ChevronsUpDown, Plus } from "lucide-react";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,22 +17,34 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import type { Company } from "./app-sidebar";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string;
-    logo: React.ElementType;
-    plan: string;
-  }[];
-}) {
+export function CompanySwitcher({ company }: { company: Company[] }) {
+  const router = useRouter();
   const { isMobile } = useSidebar();
-  const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+  const [activeCompany, setActiveCompany] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("activeCompanyId");
+      return company.find((t) => t.id === saved) || company[0];
+    }
+    return company[0];
+  });
 
-  if (!activeTeam) {
+  useEffect(() => {
+    if (activeCompany) {
+      localStorage.setItem("activeCompanyId", activeCompany.id);
+    }
+  }, [activeCompany]);
+
+  if (!activeCompany) {
     return null;
   }
+
+  const handleCompany = () => {
+    router.push("/companies");
+  };
 
   return (
     <SidebarMenu>
@@ -46,11 +56,12 @@ export function TeamSwitcher({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <activeTeam.logo className="size-4" />
+                <activeCompany.logo className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeTeam.name}</span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+                <span className="truncate font-medium">
+                  {activeCompany.name}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -62,27 +73,29 @@ export function TeamSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Teams
+              Empresas
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
+            {company.map((company, index) => (
               <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
+                key={company.id}
+                onClick={() => setActiveCompany(company)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
-                  <team.logo className="size-3.5 shrink-0" />
+                  <company.logo className="size-3.5 shrink-0" />
                 </div>
-                {team.name}
+                {company.name}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
+            <DropdownMenuItem className="gap-2 p-2" onClick={handleCompany}>
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Plus className="size-4" />
               </div>
-              <div className="text-muted-foreground font-medium">Add team</div>
+              <div className="text-muted-foreground font-medium">
+                Adicionar empresa
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
