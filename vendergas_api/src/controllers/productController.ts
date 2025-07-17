@@ -18,7 +18,7 @@ export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const { name, price, description } = req.body;
   const product = await prisma.product.update({
-    where: { id: Number(id) },
+    where: { id: id },
     data: { name, price, description },
   });
   res.json(product);
@@ -26,14 +26,14 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   const { id } = req.params;
-  await prisma.product.delete({ where: { id: Number(id) } });
+  await prisma.product.delete({ where: { id: id } });
   res.status(204).send();
 };
 
 export const getProductById = async (req, res) => {
   const { id } = req.params;
   const product = await prisma.product.findUnique({
-    where: { id: Number(id) },
+    where: { id: id },
   });
   if (!product) {
     return res.status(404).json({ error: "Product not found" });
