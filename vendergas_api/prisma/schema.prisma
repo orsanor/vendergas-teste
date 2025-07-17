@@ -8,73 +8,126 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
-  id       String    @id @default(auto()) @map("_id") @db.ObjectId
-  name     String
-  email    String    @unique
-  password String
-  company  Company[]
+model User {
+  id            String    @id @map("_id")
+  name          String
+  email         String    @unique
+  emailVerified Boolean?
+  image         String?
+  createdAt     DateTime? @default(now())
+  updatedAt     DateTime? @updatedAt
+
+  companies Company[]
+  sessions  Session[]
+  accounts  Account[]
+
+  @@map("user")
 }
 
 model Company {
-  id           String @id @default(auto()) @map("_id") @db.ObjectId
-  nomeFantasia String
-  razaoSocial  String
-  cnpj         String @unique
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  tradeName String
+  legalName String
+  cnpj      String @unique
 
-  userID  String @db.ObjectId
-  usuario Users  @relation(fields: [userID], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  client   Client[]
-  produtos Produto[]
-  pedidos  Pedido[]
+  clients  Client[]
+  products Product[]
+  orders   Order[]
 }
 
 model Client {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  nome     String
-  email    String
-  telefone String
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  email String
+  phone String
 
   companyId String  @db.ObjectId
   company   Company @relation(fields: [companyId], references: [id])
 
-  pedidos Pedido[]
+  orders Order[]
 }
 
-model Produto {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  nome      String
-  valor     Float
-  descricao String
+model Product {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  price       Float
+  description String
 
   companyId String  @db.ObjectId
-  empresa   Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id])
 
-  pedidoProdutos PedidoProduto[]
+  orderProducts OrderProduct[]
 }
 
-model Pedido {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  numero     String   @unique
-  observacao String?
-  data       DateTime @default(now())
+model Order {
+  id     String   @id @default(auto()) @map("_id") @db.ObjectId
+  number String   @unique
+  notes  String?
+  date   DateTime @default(now())
 
   clientId String @db.ObjectId
   client   Client @relation(fields: [clientId], references: [id])
 
   companyId String  @db.ObjectId
-  empresa   Company @relation(fields: [companyId], references: [id])
+  company   Company @relation(fields: [companyId], references: [id])
 
-  pedidoProdutos PedidoProduto[]
+  orderProducts OrderProduct[]
 }
 
-model PedidoProduto {
-  id         String @id @default(auto()) @map("_id") @db.ObjectId // MongoDB-compatible single id
-  pedidoId   String @db.ObjectId
-  produtoId  String @db.ObjectId
-  quantidade Int
+model OrderProduct {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String @db.ObjectId
+  productId String @db.ObjectId
+  quantity  Int
 
-  pedido  Pedido  @relation(fields: [pedidoId], references: [id])
-  produto Produto @relation(fields: [produtoId], references: [id])
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Session {
+  id        String   @id @map("_id")
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @map("_id")
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id @map("_id")
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
 }

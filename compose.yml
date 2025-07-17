@@ -1,0 +1,56 @@
+services:
+  api:
+    build:
+      context: ./vendergas_api
+    volumes:
+      - ./vendergas_api:/app
+    working_dir: /app
+    env_file:
+      - ./vendergas_api/.env
+    depends_on:
+      mongodb-setup:
+        condition: service_completed_successfully
+    ports:
+      - "3000:3000"
+      - "5555:5555"
+    command: npm run dev build
+
+  mongodb:
+    image: mongo:8
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    command: mongod --replSet rs0 --bind_ip_all
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+  mongodb-setup:
+    image: mongo:8
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: no
+    command: >
+      mongosh --host mongodb:27017 --eval "
+        rs.status().ok || rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017',priority:1}]})
+      "
+
+  frontend:
+    build:
+      context: ./vendergas_frontend
+    container_name: frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./vendergas_frontend:/app
+      - /app/node_modules
+volumes:
+  mongo_data:
