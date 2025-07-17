@@ -20,7 +20,7 @@ export const updateOrder = async (req, res) => {
   const { id } = req.params;
   const { number, notes } = req.body;
   const order = await prisma.order.update({
-    where: { id: Number(id) },
+    where: { id: id },
     data: { number, notes },
   });
   res.json(order);
@@ -28,14 +28,14 @@ export const updateOrder = async (req, res) => {
 
 export const deleteOrder = async (req, res) => {
   const { id } = req.params;
-  await prisma.order.delete({ where: { id: Number(id) } });
+  await prisma.order.delete({ where: { id: id } });
   res.status(204).send();
 };
 
 export const getOrderById = async (req, res) => {
   const { id } = req.params;
   const order = await prisma.order.findUnique({
-    where: { id: Number(id) },
+    where: { id: id },
     include: { client: true, company: true, orderProducts: true },
   });
   if (!order) {
