@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useSession } from "@/lib/auth-client";
 import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
@@ -22,18 +22,12 @@ const loginSchema = z.object({
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
-
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
   const { data: session } = useSession();
-
-  if (session) {
-    router.push("/dashboard");
-  }
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -51,7 +45,7 @@ export function LoginForm() {
 
     const validation = loginSchema.safeParse(formData);
     if (!validation.success) {
-      setErrorMessage(validation.error.errors[0].message);
+      setErrorMessage(validation.error.issues[0].message);
       setIsLoading(false);
       return;
     }
@@ -69,6 +63,12 @@ export function LoginForm() {
 
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (session) {
+      router.push("/dashboard");
+    }
+  }, [session, router]);
 
   return (
     <div className={cn("flex flex-col gap-6")}>
