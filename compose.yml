@@ -2,8 +2,11 @@ services:
   api:
     build:
       context: ./vendergas_api
+      dockerfile: Dockerfile
+    platform: linux/arm64
     volumes:
       - ./vendergas_api:/app
+      - /app/node_modules
     working_dir: /app
     env_file:
       - ./vendergas_api/.env
@@ -36,8 +39,11 @@ services:
         condition: service_healthy
     restart: no
     command: >
-      mongosh --host mongodb:27017 --eval "
-        rs.status().ok || rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017',priority:1}]})
+      sh -c "
+        until mongosh --host mongodb:27017 --eval 'rs.initiate({_id: \"rs0\", members: [{ _id: 0, host: \"mongodb:27017\" }]})'; do
+          echo 'Waiting for MongoDB to be ready...';
+          sleep 5;
+        done
       "
 
   frontend:

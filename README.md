@@ -47,7 +47,7 @@ cd teste-vendergas
 ```
 #### 2. Configure as variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto:
+Crie um arquivo `.env` na raiz do projeto backend e frontend:
 
 #### 3. Execute com Docker Compose
 
