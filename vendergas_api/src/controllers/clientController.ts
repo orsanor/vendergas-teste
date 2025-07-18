@@ -25,27 +25,48 @@ export const createClient = async (req, res) => {
 
 export const updateClient = async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone } = req.body;
-  const client = await prisma.client.update({
-    where: { id: id },
-    data: { name, email, phone },
+  const { name, email, phone, companyId } = req.body;
+  const userId = req.session?.user?.id;
+  const client = await prisma.client.findUnique({
+    where: { id },
+    include: { company: true },
   });
-  res.json(client);
+  const newCompany = await prisma.company.findUnique({
+    where: { id: companyId, userId },
+  });
+  if (!client || !newCompany) {
+    return res.status(403).json({ error: "Acesso negado" });
+  }
+  const updated = await prisma.client.update({
+    where: { id },
+    data: { name, email, phone, companyId },
+  });
+  res.json(updated);
 };
 
 export const deleteClient = async (req, res) => {
   const { id } = req.params;
-  await prisma.client.delete({ where: { id: id } });
+  const userId = req.session?.user?.id;
+  const client = await prisma.client.findUnique({
+    where: { id },
+    include: { company: true },
+  });
+  if (!client || client.company.userId !== userId) {
+    return res.status(403).json({ error: "Acesso negado" });
+  }
+  await prisma.client.delete({ where: { id } });
   res.status(204).send();
 };
 
 export const getClientById = async (req, res) => {
   const { id } = req.params;
+  const userId = req.session?.user?.id;
   const client = await prisma.client.findUnique({
     where: { id: id },
+    include: { company: true },
   });
-  if (!client) {
-    return res.status(404).json({ error: "Client not found" });
+  if (!client || client.company.userId !== userId) {
+    return res.status(403).json({ error: "Acesso negado" });
   }
   res.json(client);
 };

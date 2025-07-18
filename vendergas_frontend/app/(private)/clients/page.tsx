@@ -99,6 +99,7 @@ export default function ClientsPage() {
           name: data.name,
           email: data.email,
           phone: data.phone,
+          companyId: data.companyId
         }),
         credentials: "include",
       });
@@ -175,6 +176,7 @@ export default function ClientsPage() {
                     onSave={handleEdit}
                     onCancel={() => setEditingId(null)}
                     loading={editSaving}
+                    companies={companies}
                   />
                 ) : (
                   <div

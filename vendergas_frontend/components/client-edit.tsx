@@ -26,15 +26,18 @@ export function ClientEditForm({
   onSave,
   onCancel,
   loading,
+  companies,
 }: {
   client: Client;
   onSave: (data: Client) => void;
   onCancel: () => void;
   loading: boolean;
+  companies: { id: string; tradeName: string }[];
 }) {
   const [name, setName] = useState(client.name);
   const [email, setEmail] = useState(client.email);
   const [phone, setPhone] = useState(client.phone);
+  const [companyId, setCompanyId] = useState(client.companyId);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,14 +46,14 @@ export function ClientEditForm({
       name,
       email,
       phone,
-      companyId: client.companyId,
+      companyId,
     });
     if (!result.success) {
-      setError(result.error.errors[0].message);
+      setError(result.error.issues[0].message);
       return;
     }
     setError(null);
-    onSave({ id: client.id, name, email, phone, companyId: client.companyId });
+    onSave({ id: client.id, name, email, phone, companyId });
   };
 
   return (
@@ -81,6 +84,21 @@ export function ClientEditForm({
           className="mb-1"
           maxLength={15}
         />
+        <select
+          value={companyId}
+          onChange={(e) => setCompanyId(e.target.value)}
+          className="w-full border rounded-md px-3 py-2 mt-1"
+          required
+        >
+          <option value="" disabled>
+            Selecione a empresa
+          </option>
+          {companies.map((company) => (
+            <option key={company.id} value={company.id}>
+              {company.tradeName}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="flex gap-2 mt-2 md:mt-0">
         <Button type="submit" size="icon" disabled={loading}>

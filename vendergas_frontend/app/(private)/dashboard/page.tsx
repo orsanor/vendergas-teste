@@ -29,12 +29,12 @@ const features = [
   {
     title: "Lançar Pedido",
     description: "Cadastrar novo pedido",
-    href: "/orders/new",
+    href: "/order",
   },
   {
     title: "Gerenciar Pedidos",
     description: "Visualizar e gerenciar pedidos",
-    href: "/orders",
+    href: "/orderProducts",
   },
 ];
 
@@ -58,7 +58,6 @@ export default function DashboardPage() {
               </Link>
             ))}
           </div>
-          {/* Espaço para conteúdo futuro, como gráficos ou resumos */}
           <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
         </div>
       </SidebarInset>
