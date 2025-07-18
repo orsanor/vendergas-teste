@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { Plus, Loader2, Pencil, Trash2, Save, X } from "lucide-react";
 import { z } from "zod";
 import type { Product } from "@/types/product";
+import { useCompanies } from "@/hooks/use-companies";
+import { useSession } from "@/lib/auth-client";
 
 const productSchema = z.object({
   name: z.string().min(1, "Nome obrigatório"),
@@ -28,9 +30,9 @@ export default function ProductsPage() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [companies, setCompanies] = useState<
-    { id: string; tradeName: string }[]
-  >([]);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const { companies, loading: companiesLoading } = useCompanies(user?.id);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -65,23 +67,6 @@ export default function ProductsPage() {
 
 
   useEffect(() => {
-    fetch(`${baseUrl}/api/v1/companies`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        const companiesArray = Array.isArray(data) ? data : [];
-        setCompanies(companiesArray);
-        if (!companyId && companiesArray.length > 0) {
-          setCompanyId(companiesArray[0].id);
-          localStorage.setItem("activeCompanyId", companiesArray[0].id);
-        }
-      })
-      .catch(() => {
-        setCompanies([]);
-        toast.error("Erro ao buscar empresas");
-      });
-  }, [baseUrl]);
-
-  useEffect(() => {
     if (!companyId) return;
     setLoading(true);
     fetch(`${baseUrl}/api/v1/products/company/${companyId}`, {
@@ -99,7 +84,7 @@ export default function ProductsPage() {
       .finally(() => setLoading(false));
   }, [companyId, baseUrl]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const result = productSchema.safeParse({
       name,
@@ -232,7 +217,12 @@ export default function ProductsPage() {
           <CardTitle>Cadastrar Produto</CardTitle>
         </CardHeader>
         <CardContent>
-          {companies.length === 0 ? (
+          {companiesLoading ? (
+            <div className="text-center py-8">
+              <Loader2 className="animate-spin mb-4" />
+              <p className="text-muted-foreground">Carregando empresas...</p>
+            </div>
+          ) : companies.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">
                 Você precisa cadastrar uma empresa primeiro.
@@ -323,7 +313,12 @@ export default function ProductsPage() {
           <CardTitle>Produtos da Empresa</CardTitle>
         </CardHeader>
         <CardContent>
-          {companies.length === 0 ? (
+          {companiesLoading ? (
+            <div className="text-center py-8">
+              <Loader2 className="animate-spin mb-4" />
+              <p className="text-muted-foreground">Carregando produtos...</p>
+            </div>
+          ) : companies.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">
                 Você precisa cadastrar uma empresa primeiro.

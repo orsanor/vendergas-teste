@@ -1,14 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown, Plus, Building } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -17,7 +16,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import type { Company } from "./app-sidebar";
+import type { Company } from "@/types/company";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -37,6 +36,14 @@ export function CompanySwitcher({ company }: { company: Company[] }) {
       localStorage.setItem("activeCompanyId", activeCompany.id);
     }
   }, [activeCompany]);
+
+  useEffect(() => {
+    const handler = () => {
+      window.location.reload(); 
+    };
+    window.addEventListener("companyListChanged", handler);
+    return () => window.removeEventListener("companyListChanged", handler);
+  }, []);
 
   if (!company || company.length === 0) return null;
 
@@ -64,11 +71,11 @@ export function CompanySwitcher({ company }: { company: Company[] }) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <activeCompany.logo className="size-4" />
+                <Building className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
-                  {activeCompany.name}
+                  {activeCompany.tradeName}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
@@ -83,17 +90,16 @@ export function CompanySwitcher({ company }: { company: Company[] }) {
             <DropdownMenuLabel className="text-muted-foreground text-xs">
               Empresas
             </DropdownMenuLabel>
-            {company.map((company, index) => (
+            {company.map((company) => (
               <DropdownMenuItem
                 key={company.id}
                 onClick={() => handleSelectCompany(company)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
-                  <company.logo className="size-3.5 shrink-0" />
+                  <Building className="size-3.5 shrink-0" />
                 </div>
-                {company.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                {company.tradeName}
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />

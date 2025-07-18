@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,9 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Pencil, Trash2, Save, X, Plus } from "lucide-react";
 import { z } from "zod";
-import type { Product } from "@/types/product";
+import type { Order } from "@/types/order";
+import { useCompanies } from "@/hooks/use-companies";
+import { useSession } from "@/lib/auth-client";
 
 const orderSchema = z.object({
   notes: z.string().optional(),
@@ -21,36 +23,16 @@ const editOrderSchema = z.object({
   clientId: z.string().min(1, "Cliente obrigatório"),
 });
 
-type Order = {
-  id: string;
-  number: string;
-  notes?: string;
-  date: string;
-  clientId: string;
-  companyId: string;
-  client?: { id: string; name: string };
-  orderProducts?: { productId: string; quantity: number; product?: Product }[];
-};
-
-function maskDate(value: string) {
-  return value
-    .replace(/\D/g, "")
-    .replace(/(\d{2})(\d)/, "$1/$2")
-    .replace(/(\d{2})(\d)/, "$1/$2")
-    .slice(0, 10);
-}
-
 export default function OrderPage() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [companies, setCompanies] = useState<
-    { id: string; tradeName: string }[]
-  >([]);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const { companies, loading: companiesLoading } = useCompanies(user?.id);
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [clientId, setClientId] = useState<string | null>(null);
-  const [number, setNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,18 +62,6 @@ export default function OrderPage() {
   }, []);
 
   useEffect(() => {
-    fetch(`${baseUrl}/api/v1/companies`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        setCompanies(data);
-        if (!companyId && data.length > 0) {
-          setCompanyId(data[0].id);
-          localStorage.setItem("activeCompanyId", data[0].id);
-        }
-      });
-  }, [baseUrl]);
-
-  useEffect(() => {
     if (!companyId) return;
     fetch(`${baseUrl}/api/v1/clients?companyId=${companyId}`, {
       credentials: "include",
@@ -112,7 +82,7 @@ export default function OrderPage() {
       .finally(() => setLoading(false));
   }, [companyId, baseUrl]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const result = orderSchema.safeParse({
       notes,
@@ -244,7 +214,12 @@ export default function OrderPage() {
           <CardTitle>Cadastrar Pedido</CardTitle>
         </CardHeader>
         <CardContent>
-          {companies.length === 0 ? (
+          {companiesLoading ? (
+            <div className="text-center py-8">
+              <Loader2 className="animate-spin mb-4" />
+              <p className="text-muted-foreground">Carregando empresas...</p>
+            </div>
+          ) : companies.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">
                 Você precisa cadastrar uma empresa primeiro.
@@ -343,15 +318,16 @@ export default function OrderPage() {
           <CardTitle>Pedidos da Empresa</CardTitle>
         </CardHeader>
         <CardContent>
-          {companies.length === 0 ? (
+          {companiesLoading ? (
+            <div className="text-center py-8">
+              <Loader2 className="animate-spin mb-4" />
+              <p className="text-muted-foreground">Carregando pedidos...</p>
+            </div>
+          ) : companies.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">
                 Você precisa cadastrar uma empresa primeiro.
               </p>
-            </div>
-          ) : loading ? (
-            <div className="flex justify-center items-center h-32">
-              <Loader2 className="animate-spin" />
             </div>
           ) : orders.length === 0 ? (
             <div className="text-muted-foreground text-center">

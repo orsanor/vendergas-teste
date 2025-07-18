@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +28,7 @@ export default function UserProfilePage() {
 
   if (!user) return null;
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e: FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     try {

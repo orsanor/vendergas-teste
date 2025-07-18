@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useSession } from "@/lib/auth-client";
 import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
@@ -29,7 +29,7 @@ export function LoginForm() {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrorMessage(null);
     setIsLoading(true);
@@ -39,9 +39,6 @@ export function LoginForm() {
       email: form.email.value,
       password: form.password.value,
     };
-
-    console.log("Form Data:", formData);
-    console.log("Form:", form);
 
     const validation = loginSchema.safeParse(formData);
     if (!validation.success) {

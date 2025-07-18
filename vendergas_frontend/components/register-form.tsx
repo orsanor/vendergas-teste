@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -21,8 +21,6 @@ const registerSchema = z
     path: ["confirm"],
   });
 
-type RegisterFormData = z.infer<typeof registerSchema>;
-
 export function RegisterForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -34,12 +32,10 @@ export function RegisterForm() {
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e: FormEvent) => {
     e.preventDefault();
     setFormError("");
     setFieldErrors({});
-
-    console.log("Enviando:", { name, email, password });
 
     const { error } = await authClient.signUp.email({
       name: name,
@@ -106,7 +102,9 @@ export function RegisterForm() {
             className="text-sm"
             required
           />
-          <span className="text-xs text-muted-foreground">A senha deve conter no mínimo 8 dígitos.</span>
+          <span className="text-xs text-muted-foreground">
+            A senha deve conter no mínimo 8 dígitos.
+          </span>
           {fieldErrors.password && (
             <p className="text-sm text-red-500">{fieldErrors.password}</p>
           )}

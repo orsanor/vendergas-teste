@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "@/lib/auth-client";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Plus, Loader2, Pencil, Trash2, Save, X } from "lucide-react";
 import type { Company } from "@/types/company";
 import { z } from "zod";
+import { useCompanies } from "@/hooks/use-companies";
 
 const companySchema = z.object({
   tradeName: z.string().min(1, "Nome Fantasia obrigatório"),
@@ -31,8 +32,7 @@ export default function CompaniesPage() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const { data: session } = useSession();
   const user = session?.user;
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { companies, loading } = useCompanies(user?.id);
 
   const [tradeName, setTradeName] = useState("");
   const [legalName, setLegalName] = useState("");
@@ -46,19 +46,7 @@ export default function CompaniesPage() {
   const [editCnpj, setEditCnpj] = useState("");
   const [editSaving, setEditSaving] = useState(false);
 
-  useEffect(() => {
-    if (!user) return;
-    setLoading(true);
-    fetch(`${baseUrl}/api/v1/companies?userId=${user.id}`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setCompanies(data))
-      .catch(() => toast.error("Erro ao buscar empresas"))
-      .finally(() => setLoading(false));
-  }, [user]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const result = companySchema.safeParse({ tradeName, legalName, cnpj });
     if (!result.success) {
@@ -84,8 +72,7 @@ export default function CompaniesPage() {
         setTradeName("");
         setLegalName("");
         setCnpj("");
-        const nova = await res.json();
-        setCompanies((prev) => [...prev, nova]);
+        window.dispatchEvent(new Event("companyListChanged"));
       } else {
         toast.error("Erro ao cadastrar empresa");
       }
@@ -123,18 +110,7 @@ export default function CompaniesPage() {
       });
       if (res.ok) {
         toast.success("Empresa atualizada!");
-        setCompanies((prev) =>
-          prev.map((c) =>
-            c.id === id
-              ? {
-                  ...c,
-                  tradeName: editTradeName,
-                  legalName: editLegalName,
-                  cnpj: editCnpj,
-                }
-              : c
-          )
-        );
+        window.dispatchEvent(new Event("companyListChanged"));
         cancelEdit();
       } else {
         toast.error("Erro ao atualizar empresa");
@@ -153,7 +129,7 @@ export default function CompaniesPage() {
       });
       if (res.ok) {
         toast.success("Empresa excluída!");
-        setCompanies((prev) => prev.filter((c) => c.id !== id));
+        window.dispatchEvent(new Event("companyListChanged"));
       } else {
         toast.error("Erro ao excluir empresa");
       }

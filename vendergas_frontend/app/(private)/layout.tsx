@@ -1,7 +1,7 @@
 "use client";
 import { useSession } from "@/lib/auth-client";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   SidebarProvider,
@@ -21,7 +21,7 @@ import {
 export default function PrivateLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const { data: session, isPending } = useSession();
   const router = useRouter();

@@ -51,6 +51,19 @@ Crie um arquivo `.env` na raiz do projeto backend e frontend:
 
 #### 3. Execute com Docker Compose
 
+#### Passos antes de executar com Docker
+
+Antes de subir a aplicação com Docker, rode os comandos abaixo para instalar as dependências e gerar o Prisma:
+
+```bash
+cd vendergas_api
+npm install
+npx prisma generate
+
+cd ../vendergas_frontend
+npm install
+```
+
 ```bash
 # Construa e inicie todos os serviços
 docker-compose up --build
@@ -64,7 +77,7 @@ docker-compose down
 
 #### 4. Acesse a aplicação
 
-- **Frontend**: http://localhost:4000
+- **Frontend**: http://localhost:8080
 - **Backend API**: http://localhost:3000
 - **MongoDB**: localhost:27017
 
@@ -120,9 +133,9 @@ teste-vendergas/
 
 O sistema usa Better Auth para autenticação. Para criar um usuário inicial:
 
-1. Acesse `http://localhost:4000/register`
+1. Acesse `http://localhost:8080/register`
 2. Crie sua conta
-3. Faça login em `http://localhost:4000/login`
+3. Faça login em `http://localhost:8080/login`
 
 ## 🏢 Fluxo de Uso
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { z } from "zod";
 import type { Order } from "@/types/order";
 import type { OrderProduct } from "@/types/orderProduct";
 import type { Product } from "@/types/product";
+import { useCompanies } from "@/hooks/use-companies";
+import { useSession } from "@/lib/auth-client";
 
 const orderProductSchema = z.object({
   orderId: z.string().min(1, "Pedido obrigatório"),
@@ -24,9 +26,9 @@ export default function OrderProductsPage() {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [companies, setCompanies] = useState<
-    { id: string; tradeName: string }[]
-  >([]);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const { companies, loading: companiesLoading } = useCompanies(user?.id);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [productId, setProductId] = useState<string | null>(null);
@@ -111,24 +113,7 @@ export default function OrderProductsPage() {
       .finally(() => setLoading(false));
   }, [companyId, orderId, baseUrl]);
 
-  useEffect(() => {
-    fetch(`${baseUrl}/api/v1/companies`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        const companiesArray = Array.isArray(data) ? data : [];
-        setCompanies(companiesArray);
-        if (!companyId && companiesArray.length > 0) {
-          setCompanyId(companiesArray[0].id);
-          localStorage.setItem("activeCompanyId", companiesArray[0].id);
-        }
-      })
-      .catch(() => {
-        setCompanies([]);
-        toast.error("Erro ao buscar empresas");
-      });
-  }, [baseUrl]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const result = orderProductSchema.safeParse({
       orderId: orderId ?? "",
@@ -243,7 +228,7 @@ export default function OrderProductsPage() {
           <CardTitle>Adicionar Produto ao Pedido</CardTitle>
         </CardHeader>
         <CardContent>
-          {companies.length === 0 ? (
+          {companiesLoading || companies.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">
                 Você precisa cadastrar uma empresa primeiro.

@@ -2,7 +2,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Save, X, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { z } from "zod";
 import type { Client } from "@/types/client";
 
@@ -42,7 +42,7 @@ export function ClientEditForm({
 
   const hasCompanies = companies.length > 0;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const result = clientSchema.safeParse({
       name,

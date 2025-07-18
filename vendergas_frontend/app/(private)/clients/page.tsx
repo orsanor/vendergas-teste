@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import type { Client } from "@/types/client";
+import { useCompanies } from "@/hooks/use-companies";
+import { useSession } from "@/lib/auth-client";
 
 export default function ClientsPage() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -16,17 +18,14 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
-
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  const [companies, setCompanies] = useState<
-    { id: string; tradeName: string }[]
-  >([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
     null
   );
-
   const [companyId, setCompanyId] = useState<string | null>(null);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const { companies, loading: companiesLoading } = useCompanies(user?.id);
 
   useEffect(() => {
     const id = localStorage.getItem("activeCompanyId");
@@ -58,15 +57,11 @@ export default function ClientsPage() {
       .finally(() => setLoading(false));
   }, [companyId, baseUrl]);
 
-  // Busca empresas para o select
   useEffect(() => {
-    fetch(`${baseUrl}/api/v1/companies`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        setCompanies(data);
-        if (data.length > 0) setSelectedCompanyId(data[0].id);
-      });
-  }, []);
+    if (companies.length > 0 && !selectedCompanyId) {
+      setSelectedCompanyId(companies[0].id);
+    }
+  }, [companies, selectedCompanyId]);
 
   const handleCreate = async (data: Omit<Client, "id">) => {
     setSaving(true);
@@ -81,6 +76,7 @@ export default function ClientsPage() {
         toast.success("Cliente cadastrado!");
         const novo = await res.json();
         setClients((prev) => [...prev, novo]);
+        window.dispatchEvent(new Event("companyListChanged"));
       } else {
         toast.error("Erro ao cadastrar cliente");
       }
@@ -99,7 +95,7 @@ export default function ClientsPage() {
           name: data.name,
           email: data.email,
           phone: data.phone,
-          companyId: data.companyId
+          companyId: data.companyId,
         }),
         credentials: "include",
       });
@@ -113,6 +109,7 @@ export default function ClientsPage() {
           )
         );
         setEditingId(null);
+        window.dispatchEvent(new Event("companyListChanged")); 
       } else {
         toast.error("Erro ao atualizar cliente");
       }
@@ -131,6 +128,7 @@ export default function ClientsPage() {
       if (res.ok) {
         toast.success("Cliente excluído!");
         setClients((prev) => prev.filter((c) => c.id !== id));
+        window.dispatchEvent(new Event("companyListChanged"));
       } else {
         toast.error("Erro ao excluir cliente");
       }
@@ -141,7 +139,11 @@ export default function ClientsPage() {
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
-      {companies.length === 0 ? (
+      {companiesLoading ? (
+        <div className="flex justify-center items-center h-32">
+          <Loader2 className="animate-spin" />
+        </div>
+      ) : companies.length === 0 ? (
         <>
           <Card className="w-full max-w-md">
             <CardHeader>
@@ -181,11 +183,17 @@ export default function ClientsPage() {
               <CardTitle>Cadastrar Cliente</CardTitle>
             </CardHeader>
             <CardContent>
-              <ClientForm
-                onSubmit={handleCreate}
-                companies={companies}
-                loading={saving}
-              />
+              {companiesLoading ? (
+                <div className="flex justify-center items-center h-32">
+                  <Loader2 className="animate-spin" />
+                </div>
+              ) : (
+                <ClientForm
+                  onSubmit={handleCreate}
+                  companies={companies.map((c) => ({ id: c.id, tradeName: c.tradeName }))}
+                  loading={saving}
+                />
+              )}
             </CardContent>
           </Card>
           <Card className="flex-1">
