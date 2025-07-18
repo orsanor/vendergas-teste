@@ -38,35 +38,16 @@ Sistema completo de gestão comercial com backend em Node.js/Express, Prisma (Mo
 
 ## 🚀 Instalação
 
-### Opção 1: Instalação Local
+### Instalação Local
 
 #### 1. Clone o repositório
 ```bash
-git clone <url-do-repositorio>
+git clone <https://github.com/orsanor/vendergas-teste>
 cd teste-vendergas
 ```
-
-```
-### Execução via Docker
-
-#### 1. Clone o repositório
-```bash
-git clone <url-do-repositorio>
-cd teste-vendergas
-```
-
 #### 2. Configure as variáveis de ambiente
 
 Crie um arquivo `.env` na raiz do projeto:
-```env
-
-DATABASE_URL="mongodb://mongodb:27017/db?replicaSet=rs0&directConnection=true"
-BETTER_AUTH_SECRET=="VENDERGAS"
-BETTER_AUTH_URL=http://localhost:3000
-PORT=3000
-NODE_ENV="development"
-
-```
 
 #### 3. Execute com Docker Compose
 
