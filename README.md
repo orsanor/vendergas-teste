@@ -120,9 +120,9 @@ teste-vendergas/
 
 O sistema usa Better Auth para autenticação. Para criar um usuário inicial:
 
-1. Acesse `http://localhost:3000/register`
+1. Acesse `http://localhost:4000/register`
 2. Crie sua conta
-3. Faça login em `http://localhost:3000/login`
+3. Faça login em `http://localhost:4000/login`
 
 ## 🏢 Fluxo de Uso
 
