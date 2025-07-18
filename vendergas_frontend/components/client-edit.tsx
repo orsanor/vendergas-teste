@@ -40,6 +40,8 @@ export function ClientEditForm({
   const [companyId, setCompanyId] = useState(client.companyId);
   const [error, setError] = useState<string | null>(null);
 
+  const hasCompanies = companies.length > 0;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const result = clientSchema.safeParse({
@@ -89,19 +91,25 @@ export function ClientEditForm({
           onChange={(e) => setCompanyId(e.target.value)}
           className="w-full border rounded-md px-3 py-2 mt-1"
           required
+          disabled={!hasCompanies}
         >
           <option value="" disabled>
             Selecione a empresa
           </option>
-          {companies.map((company) => (
-            <option key={company.id} value={company.id}>
-              {company.tradeName}
-            </option>
-          ))}
+          {hasCompanies ? (
+            companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.tradeName}
+              </option>
+            ))
+          ) : null}
         </select>
+        {!hasCompanies && (
+          <div className="text-red-500 text-sm mt-1">Você precisa cadastrar uma empresa primeiro.</div>
+        )}
       </div>
       <div className="flex gap-2 mt-2 md:mt-0">
-        <Button type="submit" size="icon" disabled={loading}>
+        <Button type="submit" size="icon" disabled={loading || !hasCompanies}>
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (

@@ -141,80 +141,117 @@ export default function ClientsPage() {
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Cadastrar Cliente</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ClientForm
-            onSubmit={handleCreate}
-            companies={companies}
-            loading={saving}
-          />
-        </CardContent>
-      </Card>
-      <Card className="flex-1">
-        <CardHeader>
-          <CardTitle>Clientes da Empresa</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center items-center h-32">
-              <Loader2 className="animate-spin" />
-            </div>
-          ) : clients.length === 0 ? (
-            <div className="text-muted-foreground text-center">
-              Nenhum cliente cadastrado.
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {clients.map((client) =>
-                editingId === client.id ? (
-                  <ClientEditForm
-                    key={client.id}
-                    client={client}
-                    onSave={handleEdit}
-                    onCancel={() => setEditingId(null)}
-                    loading={editSaving}
-                    companies={companies}
-                  />
-                ) : (
-                  <div
-                    key={client.id}
-                    className="rounded-lg border p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2"
-                  >
-                    <div>
-                      <div className="font-medium">{client.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {client.email}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Telefone: {client.phone}
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => setEditingId(client.id)}
+      {companies.length === 0 ? (
+        <>
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Cadastrar Cliente</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  Você precisa cadastrar uma empresa primeiro.
+                </p>
+                <Button
+                  onClick={() => (window.location.href = "/companies")}
+                  className="w-full"
+                >
+                  Cadastrar Empresa
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="flex-1">
+            <CardHeader>
+              <CardTitle>Clientes da Empresa</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  Você precisa cadastrar uma empresa primeiro.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <>
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Cadastrar Cliente</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ClientForm
+                onSubmit={handleCreate}
+                companies={companies}
+                loading={saving}
+              />
+            </CardContent>
+          </Card>
+          <Card className="flex-1">
+            <CardHeader>
+              <CardTitle>Clientes da Empresa</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex justify-center items-center h-32">
+                  <Loader2 className="animate-spin" />
+                </div>
+              ) : clients.length === 0 ? (
+                <div className="text-muted-foreground text-center">
+                  Nenhum cliente cadastrado.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {clients.map((client) =>
+                    editingId === client.id ? (
+                      <ClientEditForm
+                        key={client.id}
+                        client={client}
+                        onSave={handleEdit}
+                        onCancel={() => setEditingId(null)}
+                        loading={editSaving}
+                        companies={companies}
+                      />
+                    ) : (
+                      <div
+                        key={client.id}
+                        className="rounded-lg border p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2"
                       >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        onClick={() => handleDelete(client.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                )
+                        <div>
+                          <div className="font-medium">{client.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {client.email}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Telefone: {client.phone}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => setEditingId(client.id)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            onClick={() => handleDelete(client.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
               )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

@@ -200,3 +200,24 @@ npm run start        # Produção
 - `POST /api/v1/order-products` - Adicionar produto ao pedido
 - `PUT /api/v1/order-products/:id` - Atualizar produto do pedido
 - `DELETE /api/v1/order-products/:id` - Remover produto do pedido
+
+## ⚠️ Observação para plataformas ARM (Apple Silicon, Raspberry Pi, etc)
+
+Se você estiver utilizando um dispositivo com arquitetura ARM (ex: Mac M1/M2, Raspberry Pi), é necessário rodar manualmente as dependências e o Prisma antes de subir a aplicação com Docker:
+
+```bash
+cd vendergas_api
+npm install
+npm run prisma generate
+
+cd ../vendergas_frontend
+npm install
+```
+
+Depois disso, execute o Docker Compose normalmente:
+
+```bash
+docker-compose up --build
+```
+
+Isso garante que as dependências nativas e o Prisma estejam corretamente gerados para sua arquitetura.

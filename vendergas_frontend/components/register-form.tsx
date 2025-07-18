@@ -106,6 +106,7 @@ export function RegisterForm() {
             className="text-sm"
             required
           />
+          <span className="text-xs text-muted-foreground">A senha deve conter no mínimo 8 dígitos.</span>
           {fieldErrors.password && (
             <p className="text-sm text-red-500">{fieldErrors.password}</p>
           )}

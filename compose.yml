@@ -3,7 +3,6 @@ services:
     build:
       context: ./vendergas_api
       dockerfile: Dockerfile
-    platform: linux/arm64
     volumes:
       - ./vendergas_api:/app
       - /app/node_modules
