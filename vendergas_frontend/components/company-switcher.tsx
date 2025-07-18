@@ -18,13 +18,13 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import type { Company } from "./app-sidebar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export function CompanySwitcher({ company }: { company: Company[] }) {
   const router = useRouter();
   const { isMobile } = useSidebar();
-  const [activeCompany, setActiveCompany] = React.useState(() => {
+  const [activeCompany, setActiveCompany] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("activeCompanyId");
       return company.find((t) => t.id === saved) || company[0];
@@ -38,13 +38,21 @@ export function CompanySwitcher({ company }: { company: Company[] }) {
     }
   }, [activeCompany]);
 
-  if (!activeCompany) {
-    return null;
-  }
+  if (!company || company.length === 0) return null;
 
   const handleCompany = () => {
     router.push("/companies");
   };
+
+  const handleSelectCompany = (company: Company) => {
+    setActiveCompany(company);
+    localStorage.setItem("activeCompanyId", company.id);
+    window.dispatchEvent(new Event("companyChanged"));
+  };
+
+  if (!activeCompany) {
+    return null;
+  }
 
   return (
     <SidebarMenu>
@@ -78,7 +86,7 @@ export function CompanySwitcher({ company }: { company: Company[] }) {
             {company.map((company, index) => (
               <DropdownMenuItem
                 key={company.id}
-                onClick={() => setActiveCompany(company)}
+                onClick={() => handleSelectCompany(company)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">

@@ -60,9 +60,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        {!loading && companies.length > 0 && (
+        {!loading && companies.length > 0 ? (
           <CompanySwitcher company={companies} />
-        )}
+        ) : !loading && companies.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <span className="mb-2">
+              <Building className="h-10 w-10 text-muted-foreground" />
+            </span>
+            <span className="text-muted-foreground text-sm text-center">
+              Você ainda não possui empresa cadastrada.
+            </span>
+          </div>
+        ) : null}
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={[]} />

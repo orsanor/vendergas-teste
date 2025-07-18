@@ -8,13 +8,24 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Loader2, Pencil, Trash2, Save, X } from "lucide-react";
+import type { Company } from "@/types/company";
+import { z } from "zod";
 
-type Company = {
-  id: string;
-  tradeName: string;
-  legalName: string;
-  cnpj: string;
-};
+const companySchema = z.object({
+  tradeName: z.string().min(1, "Nome Fantasia obrigatório"),
+  legalName: z.string().min(1, "Razão Social obrigatória"),
+  cnpj: z.string().regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/, "CNPJ inválido"),
+});
+
+function maskCnpj(value: string) {
+  return value
+    .replace(/\D/g, "")
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2")
+    .replace(/(-\d{2})\d+?$/, "$1");
+}
 
 export default function CompaniesPage() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -27,6 +38,7 @@ export default function CompaniesPage() {
   const [legalName, setLegalName] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTradeName, setEditTradeName] = useState("");
@@ -48,6 +60,12 @@ export default function CompaniesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const result = companySchema.safeParse({ tradeName, legalName, cnpj });
+    if (!result.success) {
+      setError(result.error.errors[0].message);
+      return;
+    }
+    setError(null);
     setSaving(true);
     try {
       const res = await fetch(`${baseUrl}/api/v1/companies`, {
@@ -177,11 +195,13 @@ export default function CompaniesPage() {
               <Input
                 id="cnpj"
                 value={cnpj}
-                onChange={(e) => setCnpj(e.target.value)}
+                onChange={(e) => setCnpj(maskCnpj(e.target.value))}
                 required
                 placeholder="CNPJ"
+                maxLength={18}
               />
             </div>
+            {error && <div className="text-red-500 text-sm">{error}</div>}
             <Button type="submit" className="w-full" disabled={saving}>
               {saving ? (
                 <>
@@ -221,6 +241,16 @@ export default function CompaniesPage() {
                     className="rounded-lg border p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2 bg-muted/30"
                     onSubmit={(e) => {
                       e.preventDefault();
+                      const result = companySchema.safeParse({
+                        tradeName: editTradeName,
+                        legalName: editLegalName,
+                        cnpj: editCnpj,
+                      });
+                      if (!result.success) {
+                        setError(result.error.errors[0].message);
+                        return;
+                      }
+                      setError(null);
                       handleEdit(company.id);
                     }}
                   >
@@ -244,10 +274,11 @@ export default function CompaniesPage() {
                       <Label>Cnpj</Label>
                       <Input
                         value={editCnpj}
-                        onChange={(e) => setEditCnpj(e.target.value)}
+                        onChange={(e) => setEditCnpj(maskCnpj(e.target.value))}
                         required
                         placeholder="CNPJ"
                         className="mb-1"
+                        maxLength={18}
                       />
                     </div>
                     <div className="flex gap-2 mt-2 md:mt-0">

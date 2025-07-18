@@ -11,5 +11,9 @@ productRouter.post("/", productController.createProduct);
 productRouter.put("/:id", productController.updateProduct);
 productRouter.delete("/:id", productController.deleteProduct);
 productRouter.get("/:id", productController.getProductById);
+productRouter.get(
+  "/company/:companyId",
+  productController.getProductsByCompany
+);
 
 export default productRouter;
